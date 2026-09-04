@@ -1,0 +1,45 @@
+name: Build macOS App
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Build app with PyInstaller
+        run: |
+          pyinstaller --windowed --name "CookieFarmer" \
+            --paths src \
+            --hidden-import tkinter \
+            --collect-all patchright \
+            --collect-all pyanty \
+            --collect-all capsolver_core \
+            --collect-all humanization_playwright \
+            --collect-all psutil \
+            --collect-all pystray \
+            --collect-all plyer \
+            --collect-all pynput \
+            --collect-all caveman \
+            --osx-bundle-identifier "com.cookiefarmer.app" \
+            src/main.py
+      - name: Create DMG
+        run: |
+          mkdir -p dmg_content
+          cp -R dist/CookieFarmer.app dmg_content/
+          ln -s /Applications dmg_content/Applications
+          hdiutil create -volname "Cookie Farmer" -srcfolder dmg_content -ov -format UDZO CookieFarmer.dmg
+      - name: Upload DMG artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CookieFarmerDMG
+          path: CookieFarmer.dmg
