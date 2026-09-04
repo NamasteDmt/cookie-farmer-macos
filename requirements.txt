@@ -1,0 +1,11 @@
+pyanty
+patchright
+humanization-playwright
+capsolver-core
+loguru
+psutil
+pystray
+plyer
+pynput
+caveman
+pyinstaller
